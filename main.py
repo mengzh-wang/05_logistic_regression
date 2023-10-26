@@ -157,8 +157,6 @@ y_max = max(max(x1[:, 1]), max(x2[:, 1]))
 x_co = np.linspace(x_min - 1, x_max + 1)
 
 
-plt.ylim(y_min - 1, y_max + 1)
-'''
 print("--------------梯度下降结果统计--------------")
 print("w=", w)
 print("迭代次数=", iteration)
