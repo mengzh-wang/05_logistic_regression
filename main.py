@@ -16,7 +16,9 @@ def statistic(w, xin, yin, xout, yout):
             wrong_cases_train += 1
     wrong_rate_train = wrong_cases_train / nin
 
+    pred=np.zeros([nout,1])
     for j in range(nout):
+        pred[j][0]=1/(1+np.exp(-1*np.dot(w, xout[j].T)))
         if np.dot(w, xout[j].T) * yout[j] <= 0:
             wrong_cases_test += 1
     wrong_rate_test = wrong_cases_test / nout
@@ -24,7 +26,7 @@ def statistic(w, xin, yin, xout, yout):
     print("训练集正确率=", 1 - wrong_rate_train)
     print("测试集正确率=", 1 - wrong_rate_test)
 
-    return 0
+    return pred
 
 
 """----------------洗牌----------------"""
@@ -98,9 +100,9 @@ def logistic(xin, yin, eta, batch, epoch):
 """----------------------数据集初始化----------------------"""
 
 # 数据分布与规模
-u1 = [-5, 0]
+u1 = [1, 0]
 s1 = [[1, 0], [0, 1]]
-u2 = [0, 5]
+u2 = [0, 1]
 s2 = [[1, 0], [0, 1]]
 n = 200
 train_rate = 0.8
@@ -135,14 +137,14 @@ for i in range(n_train):
 y_test = np.empty([n_test * 2, 1])
 for i in range(n_test):
     y_test[i] = 1
-    y_test[40 + i] = -1
+    y_test[n_test + i] = -1
 
 """----------------------代码运行----------------------"""
 
 time_start = time.time()
-eta = 0.001
-batch = 320
-epoch = 1000
+eta = 0.01
+batch = 80
+epoch = 100
 w, iteration, loss_f, hist = logistic(x_train, y_train, eta, batch, epoch)
 time_end = time.time()
 time_gd_spend = time_end - time_start
@@ -154,31 +156,18 @@ y_min = min(min(x1[:, 1]), min(x2[:, 1]))
 y_max = max(max(x1[:, 1]), max(x2[:, 1]))
 x_co = np.linspace(x_min - 1, x_max + 1)
 
-'''print("--------------广义逆结果统计--------------")
-print("w=", w_lg)
-statistic(w_lg, x_train, y_train, n_train, x_test, y_test, n_test)
-print("算法运行时间=", time_lg_spend, "s")
 
-plt.figure("广义逆算法")
-str1 = "gen_inverse, x1~N(%s,%s), x2~N(%s,%s)" % (u1, s1, u2, s2)
-plt.title(str1)
-# z_pla = -(w_lg[0][0] / w_lg[0][1]) * x_co
-z_pla = -(w_lg[0][0] / w_lg[0][1]) * x_co - w_lg[0][2] / w_lg[0][1]
-plt.scatter(x1[:, 0], x1[:, 1], c='r')
-plt.scatter(x2[:, 0], x2[:, 1], c='b')
-plt.plot(x_co, z_pla, c='g')
-plt.xlim(x_min - 1, x_max + 1)
 plt.ylim(y_min - 1, y_max + 1)
 '''
 print("--------------梯度下降结果统计--------------")
 print("w=", w)
 print("迭代次数=", iteration)
 print("损失函数=", loss_f[len(loss_f) - 1, 1])
-statistic(w, x_train, y_train, x_test, y_test)
+pred = statistic(w, x_train, y_train, x_test, y_test)
 print("算法运行时间=", time_gd_spend, "s")
 
 plt.figure("梯度下降算法")
-str2 = "grandient_descent, x1~N(%s,%s), x2~N(%s,%s)" % (u1, s1, u2, s2)
+str2 = "logistic, x1~N(%s,%s), x2~N(%s,%s)" % (u1, s1, u2, s2)
 plt.title(str2)
 z_gd = -(w[0] / w[1]) * x_co - w[2] / w[1]
 plt.scatter(x1[:, 0], x1[:, 1], c='r')
@@ -193,3 +182,5 @@ plt.title(str2)
 plt.plot(loss_f[:, 0], loss_f[:, 1], c='k')
 
 plt.show()
+
+print('end')
